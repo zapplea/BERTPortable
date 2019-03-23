@@ -163,22 +163,16 @@ class FullTokenizer(object):
 
   def __init__(self, vocab_file, do_lower_case=True):
     self.vocab = load_vocab(vocab_file)
-    print('vocab: ',self.vocab)
     # TODO: research on how does it works
     self.inv_vocab = {v: k for k, v in self.vocab.items()}
     self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
     self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
 
   def tokenize(self, text):
-    print('FullTokenizer.tokenize text: ',text)
     split_tokens = []
     for token in self.basic_tokenizer.tokenize(text):
-      print('FullTokenizer.tokenize token: ',token)
       for sub_token in self.wordpiece_tokenizer.tokenize(token):
-        print('wordpiece_tokenizer.tokenize token: ',sub_token)
         split_tokens.append(sub_token)
-    print('FullTokenizer.tokenize split_tokens: ',split_tokens)
-    exit()
     return split_tokens
 
   def convert_tokens_to_ids(self, tokens):

@@ -22,6 +22,7 @@ import collections
 import random
 import tokenization
 import tensorflow as tf
+import pickle
 
 flags = tf.flags
 
@@ -172,6 +173,11 @@ def create_float_feature(values):
   feature = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
   return feature
 
+def prepare_corpus():
+  """
+  prepare vocab, all documents. eliminate words which is too long(max 11)
+  :return:
+  """
 
 def create_training_instances(input_files, tokenizer, max_seq_length,
                               dupe_factor, short_seq_prob, masked_lm_prob,
@@ -446,3 +452,9 @@ if __name__ == "__main__":
   flags.mark_flag_as_required("output_file")
   flags.mark_flag_as_required("vocab_file")
   tf.app.run()
+  config = {'input_files':['','',''],
+            'max_vocab_size':2000000,
+            'min_word_occurance':1,
+            'max_word_len':11,
+            'unknown_word':'#UNK#',
+            }
