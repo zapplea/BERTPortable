@@ -25,42 +25,42 @@ import tensorflow as tf
 import pandas as pd
 from collections import Counter
 
-flags = tf.flags
-
-FLAGS = flags.FLAGS
-
-flags.DEFINE_string("input_file", None,
-                    "Input raw text file (or comma-separated list of files).")
-
-flags.DEFINE_string(
-    "output_file", None,
-    "Output TF example file (or comma-separated list of files).")
-
-flags.DEFINE_string("vocab_file", None,
-                    "The vocabulary file that the BERT model was trained on.")
-
-flags.DEFINE_bool(
-    "do_lower_case", True,
-    "Whether to lower case the input text. Should be True for uncased "
-    "models and False for cased models.")
-
-flags.DEFINE_integer("max_seq_length", 128, "Maximum sequence length.")
-
-flags.DEFINE_integer("max_predictions_per_seq", 20,
-                     "Maximum number of masked LM predictions per sequence.")
-
-flags.DEFINE_integer("random_seed", 12345, "Random seed for data generation.")
-
-flags.DEFINE_integer(
-    "dupe_factor", 10,
-    "Number of times to duplicate the input data (with different masks).")
-
-flags.DEFINE_float("masked_lm_prob", 0.15, "Masked LM probability.")
-
-flags.DEFINE_float(
-    "short_seq_prob", 0.1,
-    "Probability of creating sequences which are shorter than the "
-    "maximum length.")
+# flags = tf.flags
+#
+# FLAGS = flags.FLAGS
+#
+# flags.DEFINE_string("input_file", None,
+#                     "Input raw text file (or comma-separated list of files).")
+#
+# flags.DEFINE_string(
+#     "output_file", None,
+#     "Output TF example file (or comma-separated list of files).")
+#
+# flags.DEFINE_string("vocab_file", None,
+#                     "The vocabulary file that the BERT model was trained on.")
+#
+# flags.DEFINE_bool(
+#     "do_lower_case", True,
+#     "Whether to lower case the input text. Should be True for uncased "
+#     "models and False for cased models.")
+#
+# flags.DEFINE_integer("max_seq_length", 128, "Maximum sequence length.")
+#
+# flags.DEFINE_integer("max_predictions_per_seq", 20,
+#                      "Maximum number of masked LM predictions per sequence.")
+#
+# flags.DEFINE_integer("random_seed", 12345, "Random seed for data generation.")
+#
+# flags.DEFINE_integer(
+#     "dupe_factor", 10,
+#     "Number of times to duplicate the input data (with different masks).")
+#
+# flags.DEFINE_float("masked_lm_prob", 0.15, "Masked LM probability.")
+#
+# flags.DEFINE_float(
+#     "short_seq_prob", 0.1,
+#     "Probability of creating sequences which are shorter than the "
+#     "maximum length.")
 
 
 class TrainingInstance(object):
@@ -449,10 +449,10 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
 
 
 def main(config):
-  tf.logging.set_verbosity(tf.logging.INFO)
+  # tf.logging.set_verbosity(tf.logging.INFO)
 
-  tokenizer = tokenization.FullTokenizer(
-      vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
+  # tokenizer = tokenization.FullTokenizer(
+  #     vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
 
   rng = random.Random(config['training_data']['random_seed'])
@@ -464,21 +464,21 @@ def main(config):
   print(instances[1])
   exit()
   # TODO: check [MASK],[CLS],[SEP]
-  output_files = FLAGS.output_file.split(",")
-  tf.logging.info("*** Writing to output files ***")
-  for output_file in output_files:
-    tf.logging.info("  %s", output_file)
+  # output_files = FLAGS.output_file.split(",")
+  # tf.logging.info("*** Writing to output files ***")
+  # for output_file in output_files:
+  #   tf.logging.info("  %s", output_file)
 
-  write_instance_to_example_files(instances, tokenizer, FLAGS.max_seq_length,
-                                  FLAGS.max_predictions_per_seq, output_files)
+  # write_instance_to_example_files(instances, tokenizer, FLAGS.max_seq_length,
+  #                                 FLAGS.max_predictions_per_seq, output_files)
 
 
 if __name__ == "__main__":
   # TODO: check where to convert token word to id, especially [CLS],[SEP], [MASK]
-  flags.mark_flag_as_required("input_file")
-  flags.mark_flag_as_required("output_file")
-  flags.mark_flag_as_required("vocab_file")
-  tf.app.run()
+  # flags.mark_flag_as_required("input_file")
+  # flags.mark_flag_as_required("output_file")
+  # flags.mark_flag_as_required("vocab_file")
+  # tf.app.run()
   config = {'corpus':{'input_filePaths':[#'/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
                                          #'/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
                                          #'/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
@@ -495,3 +495,4 @@ if __name__ == "__main__":
                              'random_seed':12345,
                              'output_file':'/datastore/liu121/sentidata2/data/bert'}
             }
+  main(config)
