@@ -22,7 +22,8 @@ import collections
 import random
 import tokenization
 import tensorflow as tf
-import pickle
+import pandas as pd
+from collections import Counter
 
 flags = tf.flags
 
@@ -102,6 +103,7 @@ def write_instance_to_example_files(instances, tokenizer, max_seq_length,
 
   total_written = 0
   for (inst_index, instance) in enumerate(instances):
+    # EXPL: convert token to id
     input_ids = tokenizer.convert_tokens_to_ids(instance.tokens)
     input_mask = [1] * len(input_ids)
     segment_ids = list(instance.segment_ids)
@@ -173,17 +175,66 @@ def create_float_feature(values):
   feature = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
   return feature
 
-def prepare_corpus():
+
+def split_sentence(data, config):
+  new_data = []
+  for review in data:
+    new_review = []
+    for sentence in review:
+      sentence = sentence.split(' ')
+      if len(sentence) > config['corpus']['max_sentence_len']:
+        multiple = len(sentence) // config['corpus']['max_sentence_len']
+        mod = len(sentence) % config['corpus']['max_sentence_len']
+        if mod == 0:
+          rng = multiple
+        else:
+          rng = multiple + 1
+        for i in range(rng):
+          start = i * config['corpus']['max_sentence_len']
+          stop = start + config['corpus']['max_sentence_len'] - 1
+          new_review.append(' '.join(sentence[start:stop]))
+      else:
+        new_review.append(' '.join(sentence))
+    new_data.append(new_review)
+  return new_data
+
+def prepare_corpus(config):
   """
   prepare vocab, all documents. eliminate words which is too long(max 11)
   :return:
   """
+  # TODO: cut a long sentence to pieces with maximum length as 200
+  all_documents = []
+  word_counts = Counter()
+  for input_filePath in config['corpus']['input_filePaths']:
+    review_collection = pd.read_pickle(input_filePath)[:,1]
+    review_collection = split_sentence(review_collection,config)
+    for review in review_collection:
+      all_documents.append([])
+      for sentence in review:
+        sentence = sentence.split(' ')
+        for i in range(len(sentence)):
+          word = sentence[i]
+          if len(list(word))>config['corpus']['max_word_len']:
+            sentence[i] = config['corpus']['unknown_word']
+        word_counts.update(sentence)
+        all_documents[-1].append(sentence)
 
-def create_training_instances(input_files, tokenizer, max_seq_length,
+  words = [word for word, count in word_counts.most_common(config['corpus']['vocab_size'])
+                  if count >= config['corpus']['min_word_occurance']]
+  words2 = ['[UNK]','[MASK]','CLS']
+  words2.extend(words)
+  # generate word vocabulary
+  word_to_id = {word: i for i, word in enumerate(words2)}
+  print('word vocab size: ', len(word_to_id))
+  return all_documents,word_to_id
+
+
+
+def create_training_instances(all_documents,vocab, max_seq_length,
                               dupe_factor, short_seq_prob, masked_lm_prob,
                               max_predictions_per_seq, rng):
   """Create `TrainingInstance`s from raw text."""
-  all_documents = [[]]
 
   # Input file format:
   # (1) One sentence per line. These should ideally be actual sentences, not
@@ -191,32 +242,10 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   # sentence boundaries for the "next sentence prediction" task).
   # (2) Blank lines between documents. Document boundaries are needed so
   # that the "next sentence prediction" task doesn't span between documents.
-  for input_file in input_files:
-    with tf.gfile.GFile(input_file, "r") as reader:
-      while True:
-        line = tokenization.convert_to_unicode(reader.readline())
-        print(line)
-        if not line:
-          break
-        line = line.strip()
-        print(line)
-        # Empty lines are used as document delimiters
-        if not line:
-          all_documents.append([])
-        tokens = tokenizer.tokenize(line)
-        print(tokens)
-        if tokens:
-          all_documents[-1].append(tokens)
-        print(all_documents)
-        exit()
-  print(all_documents)
-  exit()
 
-  # Remove empty documents
-  all_documents = [x for x in all_documents if x]
   rng.shuffle(all_documents)
 
-  vocab_words = list(tokenizer.vocab.keys())
+  vocab_words = list(vocab.keys())
   instances = []
   for _ in range(dupe_factor):
     for document_index in range(len(all_documents)):
@@ -419,25 +448,22 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
       trunc_tokens.pop()
 
 
-def main(_):
+def main(config):
   tf.logging.set_verbosity(tf.logging.INFO)
 
   tokenizer = tokenization.FullTokenizer(
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
-  input_files = []
-  for input_pattern in FLAGS.input_file.split(","):
-    input_files.extend(tf.gfile.Glob(input_pattern))
 
-  tf.logging.info("*** Reading from input files ***")
-  for input_file in input_files:
-    tf.logging.info("  %s", input_file)
-
-  rng = random.Random(FLAGS.random_seed)
+  rng = random.Random(config['training_data']['random_seed'])
+  all_documents,vocab = prepare_corpus(config)
   instances = create_training_instances(
-      input_files, tokenizer, FLAGS.max_seq_length, FLAGS.dupe_factor,
-      FLAGS.short_seq_prob, FLAGS.masked_lm_prob, FLAGS.max_predictions_per_seq,
-      rng)
+      all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
+      config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
+      config['training_data']['max_predictions_per_seq'],rng)
+  print(instances)
+  exit()
+  # TODO: check [MASK],[CLS],[SEP]
   output_files = FLAGS.output_file.split(",")
   tf.logging.info("*** Writing to output files ***")
   for output_file in output_files:
@@ -448,13 +474,24 @@ def main(_):
 
 
 if __name__ == "__main__":
+  # TODO: check where to convert token word to id, especially [CLS],[SEP], [MASK]
   flags.mark_flag_as_required("input_file")
   flags.mark_flag_as_required("output_file")
   flags.mark_flag_as_required("vocab_file")
   tf.app.run()
-  config = {'input_files':['','',''],
-            'max_vocab_size':2000000,
-            'min_word_occurance':1,
-            'max_word_len':11,
-            'unknown_word':'#UNK#',
+  config = {'corpus':{'input_filePaths':[#'/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
+                                         #'/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
+                                         #'/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/val_cut.pkl'],
+                      'vocab_size':2000000,
+                      'min_word_occurance':1,
+                      'max_word_len':11,
+                      'unknown_word':'#UNK#',
+                      'max_sentence_len':203},
+            'training_data':{'dupe_factor':10,
+                             'short_seq_prob':0.1,
+                             'masked_lm_prob':0.15,
+                             'max_predictions_per_seq':20,
+                             'random_seed':12345,
+                             'output_file':''}
             }
