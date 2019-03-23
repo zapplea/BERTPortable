@@ -190,17 +190,19 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
       while True:
         line = tokenization.convert_to_unicode(reader.readline())
         print(line)
-        exit()
         if not line:
           break
         line = line.strip()
-
+        print(line)
         # Empty lines are used as document delimiters
         if not line:
           all_documents.append([])
         tokens = tokenizer.tokenize(line)
+        print(tokens)
         if tokens:
           all_documents[-1].append(tokens)
+        print(all_documents)
+        exit()
   print(all_documents)
   exit()
 
