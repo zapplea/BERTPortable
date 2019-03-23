@@ -91,6 +91,7 @@ class TrainingInstance(object):
 
 def write_instance_to_example_files(instances, tokenizer, max_seq_length,
                                     max_predictions_per_seq, output_files):
+  # TODO: need to save data to pickle
   """Create TF example files from `TrainingInstance`s."""
   writers = []
   for output_file in output_files:

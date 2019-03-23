@@ -1,9 +1,15 @@
-import multiGPU_graph
-import train
+from multiGPU_graph import GraphBuilder
+from train import Train
+from datafeeder import DataFeeder
 
-def main():
+def main(config):
     # TODO: construct metrics
-    pass
+    # DONE: output all variables value to pickle, so that we can use it to initialize other models.
+    df = DataFeeder(config)
+    train = Train(config,df)
+    gb = GraphBuilder(config)
+    model_dict = gb.build_graph()
+    train.train(model_dict)
 
 if __name__ == "__main__":
     config = {'model':{'max_seq_length':None,
@@ -23,6 +29,11 @@ if __name__ == "__main__":
                        'lr':5e-5,
                        'num_warmup_steps':10000,
                        },
-              'train':{'epoch':100000,},
-              'data':{}
+              'train':{'epoch':100000,
+                       'varval_filePath':'.pkl',
+                       },
+              'data':{'batch_size':100,
+                      'train_dataset_filePath':'',
+                      'val_dataset_filePath':'',
+                      }
              }
