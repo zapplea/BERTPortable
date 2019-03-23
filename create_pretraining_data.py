@@ -461,7 +461,7 @@ def main(config):
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
       config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
       config['training_data']['max_predictions_per_seq'],rng)
-  print(instances)
+  print(instances[1])
   exit()
   # TODO: check [MASK],[CLS],[SEP]
   output_files = FLAGS.output_file.split(",")
