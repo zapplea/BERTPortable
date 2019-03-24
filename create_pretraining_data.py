@@ -249,11 +249,13 @@ def create_training_instances(all_documents,vocab, max_seq_length,
   instances = []
   for _ in range(dupe_factor):
     for document_index in range(len(all_documents)):
+      print('document: ',all_documents[document_index])
       instances.extend(
           create_instances_from_document(
               all_documents, document_index, max_seq_length, short_seq_prob,
               masked_lm_prob, max_predictions_per_seq, vocab_words, rng))
-
+      print(instances[-1])
+      exit()
   rng.shuffle(instances)
   return instances
 
@@ -457,6 +459,7 @@ def main(config):
 
   rng = random.Random(config['training_data']['random_seed'])
   all_documents,vocab = prepare_corpus(config)
+  print(vocab)
   instances = create_training_instances(
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
       config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
@@ -475,6 +478,7 @@ def main(config):
 
 if __name__ == "__main__":
   # TODO: check where to convert token word to id, especially [CLS],[SEP], [MASK]
+  # TODO: check it use multiple sentences or merge them to a big sentence
   # flags.mark_flag_as_required("input_file")
   # flags.mark_flag_as_required("output_file")
   # flags.mark_flag_as_required("vocab_file")
