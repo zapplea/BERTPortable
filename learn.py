@@ -12,8 +12,8 @@ def main(config):
     train.train(model_dict)
 
 if __name__ == "__main__":
-    config = {'model':{'max_seq_length':None,
-                       'max_predictions_per_seq':None,
+    config = {'model':{'max_seq_length':1144,
+                       'max_predictions_per_seq':20,
                        'gpu_num':2,
                        'is_training':True,
                        'hidden_dropout_prob':0.1,
@@ -22,7 +22,7 @@ if __name__ == "__main__":
                        'hidden_size':300, # embedding size
                        'initializer_range':0.02,
                        'type_vocab_size':16,
-                       'max_position_embeddings':512, #max seq length
+                       'max_position_embeddings':1144, #max seq length
                        'num_hidden_layers':12,
                        'num_attention_heads':12,
                        'hidden_act':'relu', # linear/relu/gelu/tanh
