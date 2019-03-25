@@ -450,9 +450,9 @@ def main(config):
 if __name__ == "__main__":
   # DONE: check where to convert token word to id, especially [CLS],[SEP], [MASK]. there is a function which will convert token to id
   # DONE: check it use multiple sentences or merge them to a big sentence. Merge a review to a big sentence.
-  config = {'corpus':{'input_filePaths':[#'/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
-                                         #'/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
-                                         #'/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
+  config = {'corpus':{'input_filePaths':['/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
                                          '/datastore/liu121/sentidata2/data/meituan_jieba/val_cut.pkl'],
                       'vocab_size':2000000,
                       'min_word_occurance':1,
