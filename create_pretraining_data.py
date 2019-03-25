@@ -20,10 +20,11 @@ from __future__ import print_function
 
 import collections
 import random
-import tokenization
 import tensorflow as tf
 import pandas as pd
 from collections import Counter
+import pickle
+import numpy as np
 
 # flags = tf.flags
 #
@@ -91,90 +92,69 @@ class TrainingInstance(object):
     return self.__str__()
 
 
-def write_instance_to_example_files(instances, tokenizer, max_seq_length,
-                                    max_predictions_per_seq, output_files):
+
+def write_instance_to_example_files(instances, vocab, max_seq_length,
+                                    max_predictions_per_seq, output_file):
   # TODO: need to save data to pickle
   """Create TF example files from `TrainingInstance`s."""
-  writers = []
-  for output_file in output_files:
-    writers.append(tf.python_io.TFRecordWriter(output_file))
+  input_ids_collection = []
+  input_mask_collection = []
+  segment_ids_collection = []
+  masked_lm_positions_collection = []
+  masked_lm_ids_collection = []
+  masked_lm_weights_collection = []
+  next_sentence_label_collection = []
 
-  writer_index = 0
+  with open(output_file,'wb') as outf:
+    for (inst_index, instance) in enumerate(instances):
+      # EXPL: convert token to id
+      input_ids = convert_tokens_to_ids(instance.tokens,vocab)
+      input_mask = [1] * len(input_ids)
+      segment_ids = list(instance.segment_ids)
+      assert len(input_ids) <= max_seq_length
 
-  total_written = 0
-  for (inst_index, instance) in enumerate(instances):
-    # EXPL: convert token to id
-    input_ids = tokenizer.convert_tokens_to_ids(instance.tokens)
-    input_mask = [1] * len(input_ids)
-    segment_ids = list(instance.segment_ids)
-    assert len(input_ids) <= max_seq_length
+      while len(input_ids) < max_seq_length:
+        input_ids.append(0)
+        input_mask.append(0)
+        segment_ids.append(0)
 
-    while len(input_ids) < max_seq_length:
-      input_ids.append(0)
-      input_mask.append(0)
-      segment_ids.append(0)
+      assert len(input_ids) == max_seq_length
+      assert len(input_mask) == max_seq_length
+      assert len(segment_ids) == max_seq_length
 
-    assert len(input_ids) == max_seq_length
-    assert len(input_mask) == max_seq_length
-    assert len(segment_ids) == max_seq_length
+      masked_lm_positions = list(instance.masked_lm_positions)
+      masked_lm_ids = convert_tokens_to_ids(instance.masked_lm_labels,vocab)
+      masked_lm_weights = [1.0] * len(masked_lm_ids)
 
-    masked_lm_positions = list(instance.masked_lm_positions)
-    masked_lm_ids = tokenizer.convert_tokens_to_ids(instance.masked_lm_labels)
-    masked_lm_weights = [1.0] * len(masked_lm_ids)
+      while len(masked_lm_positions) < max_predictions_per_seq:
+        masked_lm_positions.append(0)
+        masked_lm_ids.append(0)
+        masked_lm_weights.append(0.0)
 
-    while len(masked_lm_positions) < max_predictions_per_seq:
-      masked_lm_positions.append(0)
-      masked_lm_ids.append(0)
-      masked_lm_weights.append(0.0)
+      next_sentence_label = 1 if instance.is_random_next else 0
 
-    next_sentence_label = 1 if instance.is_random_next else 0
+      input_ids_collection.append(np.array(input_ids).astype('int64'))
+      input_mask_collection.append(np.array(input_mask).astype('int64'))
+      segment_ids_collection.append(np.array(segment_ids).astype('int64'))
+      masked_lm_positions_collection.append(np.array(masked_lm_positions).astype('int64'))
+      masked_lm_ids_collection.append(np.array(masked_lm_ids).astype('int64'))
+      masked_lm_weights_collection.append(np.array(masked_lm_weights).astype('int64'))
+      next_sentence_label_collection.append(np.array([next_sentence_label]).astype('int64'))
+      exit()
+    pickle.dump((input_ids_collection,
+                 input_mask_collection,
+                 segment_ids_collection,
+                 masked_lm_positions_collection,
+                 masked_lm_ids_collection,
+                 masked_lm_weights_collection,
+                 next_sentence_label_collection),
+                outf)
 
-    features = collections.OrderedDict()
-    features["input_ids"] = create_int_feature(input_ids)
-    features["input_mask"] = create_int_feature(input_mask)
-    features["segment_ids"] = create_int_feature(segment_ids)
-    features["masked_lm_positions"] = create_int_feature(masked_lm_positions)
-    features["masked_lm_ids"] = create_int_feature(masked_lm_ids)
-    features["masked_lm_weights"] = create_float_feature(masked_lm_weights)
-    features["next_sentence_labels"] = create_int_feature([next_sentence_label])
-
-    tf_example = tf.train.Example(features=tf.train.Features(feature=features))
-
-    writers[writer_index].write(tf_example.SerializeToString())
-    writer_index = (writer_index + 1) % len(writers)
-
-    total_written += 1
-
-    if inst_index < 20:
-      tf.logging.info("*** Example ***")
-      tf.logging.info("tokens: %s" % " ".join(
-          [tokenization.printable_text(x) for x in instance.tokens]))
-
-      for feature_name in features.keys():
-        feature = features[feature_name]
-        values = []
-        if feature.int64_list.value:
-          values = feature.int64_list.value
-        elif feature.float_list.value:
-          values = feature.float_list.value
-        tf.logging.info(
-            "%s: %s" % (feature_name, " ".join([str(x) for x in values])))
-
-  for writer in writers:
-    writer.close()
-
-  tf.logging.info("Wrote %d total instances", total_written)
-
-
-def create_int_feature(values):
-  feature = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
-  return feature
-
-
-def create_float_feature(values):
-  feature = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
-  return feature
-
+def convert_tokens_to_ids(tokens,vocab):
+  output = []
+  for token in tokens:
+    output.append(vocab[token])
+  return output
 
 def split_sentence(data, config):
   new_data = []
@@ -203,7 +183,7 @@ def prepare_corpus(config):
   prepare vocab, all documents. eliminate words which is too long(max 11)
   :return:
   """
-  # TODO: cut a long sentence to pieces with maximum length as 200
+  # RECTIFY: bert will merge the review to a large sentence TODO: cut a long sentence to pieces with maximum length as 200
   all_documents = []
   word_counts = Counter()
   for input_filePath in config['corpus']['input_filePaths']:
@@ -222,11 +202,16 @@ def prepare_corpus(config):
 
   words = [word for word, count in word_counts.most_common(config['corpus']['vocab_size'])
                   if count >= config['corpus']['min_word_occurance']]
-  words2 = ['[UNK]','[MASK]','CLS']
+  words2 = ['[PAD]','[UNK]','[MASK]','[CLS]','[SEP]']
   words2.extend(words)
   # generate word vocabulary
   word_to_id = {word: i for i, word in enumerate(words2)}
   print('word vocab size: ', len(word_to_id))
+  print('[PAD]: ', word_to_id['[PAD]'])
+  print('[UNK]: ', word_to_id['[UNK]'])
+  print('[MASK]: ', word_to_id['[MASK]'])
+  print('[CLS]: ', word_to_id['[CLS]'])
+  print('[SEP]: ', word_to_id['[SEP]'])
   return all_documents,word_to_id
 
 
@@ -249,13 +234,10 @@ def create_training_instances(all_documents,vocab, max_seq_length,
   instances = []
   for _ in range(dupe_factor):
     for document_index in range(len(all_documents)):
-      print('document: ',all_documents[document_index])
       instances.extend(
           create_instances_from_document(
               all_documents, document_index, max_seq_length, short_seq_prob,
               masked_lm_prob, max_predictions_per_seq, vocab_words, rng))
-      print(instances[-1])
-      exit()
   rng.shuffle(instances)
   return instances
 
@@ -459,7 +441,6 @@ def main(config):
 
   rng = random.Random(config['training_data']['random_seed'])
   all_documents,vocab = prepare_corpus(config)
-  print(vocab)
   instances = create_training_instances(
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
       config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
@@ -467,13 +448,16 @@ def main(config):
   print(instances[1])
   exit()
   # TODO: check [MASK],[CLS],[SEP]
+  # TODO: check where the max sequence length is used. It seems that in instance, the document is merged to
+  # TODO: one big sentence.
   # output_files = FLAGS.output_file.split(",")
   # tf.logging.info("*** Writing to output files ***")
   # for output_file in output_files:
   #   tf.logging.info("  %s", output_file)
 
-  # write_instance_to_example_files(instances, tokenizer, FLAGS.max_seq_length,
-  #                                 FLAGS.max_predictions_per_seq, output_files)
+  write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
+                                  config['training_data']['max_predictions_per_seq'],
+                                  config['training_data']['output_file'])
 
 
 if __name__ == "__main__":
@@ -491,12 +475,12 @@ if __name__ == "__main__":
                       'min_word_occurance':1,
                       'max_word_len':11,
                       'unknown_word':'#UNK#',
-                      'max_sentence_len':203},
+                      'max_sentence_len':1144},
             'training_data':{'dupe_factor':10,
                              'short_seq_prob':0.1,
                              'masked_lm_prob':0.15,
                              'max_predictions_per_seq':20,
                              'random_seed':12345,
-                             'output_file':'/datastore/liu121/sentidata2/data/bert'}
+                             'output_file':'/datastore/liu121/sentidata2/data/bert/train_data.pkl'}
             }
   main(config)
