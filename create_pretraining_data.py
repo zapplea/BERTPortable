@@ -20,7 +20,6 @@ from __future__ import print_function
 
 import collections
 import random
-import tensorflow as tf
 import pandas as pd
 from collections import Counter
 import pickle
