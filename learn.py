@@ -19,7 +19,7 @@ if __name__ == "__main__":
                        'hidden_dropout_prob':0.1,
                        'attention_probs_dropout_prob':0.1,
                        'vocab_size':None,
-                       'hidden_size':None,
+                       'hidden_size':300, # embedding size
                        'initializer_range':0.02,
                        'type_vocab_size':16,
                        'max_position_embeddings':512, #max seq length

@@ -94,7 +94,7 @@ class TrainingInstance(object):
 
 def write_instance_to_example_files(instances, vocab, max_seq_length,
                                     max_predictions_per_seq, output_file):
-  # TODO: need to save data to pickle
+  # DONE: need to save data to pickle
   """Create TF example files from `TrainingInstance`s."""
   input_ids_collection = []
   input_mask_collection = []
@@ -139,7 +139,6 @@ def write_instance_to_example_files(instances, vocab, max_seq_length,
       masked_lm_ids_collection.append(np.array(masked_lm_ids).astype('int64'))
       masked_lm_weights_collection.append(np.array(masked_lm_weights).astype('int64'))
       next_sentence_label_collection.append(np.array([next_sentence_label]).astype('int64'))
-      exit()
     pickle.dump((input_ids_collection,
                  input_mask_collection,
                  segment_ids_collection,
@@ -432,27 +431,16 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
 
 
 def main(config):
-  # tf.logging.set_verbosity(tf.logging.INFO)
-  #
-  # tokenizer = tokenization.FullTokenizer(
-  #     vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
-
-
   rng = random.Random(config['training_data']['random_seed'])
   all_documents,vocab = prepare_corpus(config)
   instances = create_training_instances(
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
       config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
       config['training_data']['max_predictions_per_seq'],rng)
-  print(instances[1])
-  exit()
-  # TODO: check [MASK],[CLS],[SEP]
-  # TODO: check where the max sequence length is used. It seems that in instance, the document is merged to
-  # TODO: one big sentence.
-  # output_files = FLAGS.output_file.split(",")
-  # tf.logging.info("*** Writing to output files ***")
-  # for output_file in output_files:
-  #   tf.logging.info("  %s", output_file)
+  print("instance sample 77: ",instances[77])
+  # DONE: check [MASK],[CLS],[SEP]. add ['[PAD]','[UNK]','[MASK]','[CLS]','[SEP]'] at top
+  # DONE: check where the max sequence length is used. It seems that in instance, the document is merged to
+  # DONE: one big sentence.
 
   write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
                                   config['training_data']['max_predictions_per_seq'],
@@ -460,12 +448,8 @@ def main(config):
 
 
 if __name__ == "__main__":
-  # TODO: check where to convert token word to id, especially [CLS],[SEP], [MASK]
-  # TODO: check it use multiple sentences or merge them to a big sentence
-  # flags.mark_flag_as_required("input_file")
-  # flags.mark_flag_as_required("output_file")
-  # flags.mark_flag_as_required("vocab_file")
-  # tf.app.run()
+  # DONE: check where to convert token word to id, especially [CLS],[SEP], [MASK]. there is a function which will convert token to id
+  # DONE: check it use multiple sentences or merge them to a big sentence. Merge a review to a big sentence.
   config = {'corpus':{'input_filePaths':[#'/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
                                          #'/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
                                          #'/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
