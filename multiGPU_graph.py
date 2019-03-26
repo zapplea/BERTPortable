@@ -125,14 +125,11 @@ class GraphBuilder:
     def compute_grads(self,loss,tower_grads):
         # all var
         vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-        # attribute
-        var_list = []
         for var in vars:
-            var_list.append(var)
             print(var.name)
         print('==========================')
 
-        grads = tf.gradients(loss,var_list=var_list,aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
+        grads = tf.gradients(loss,vars,aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
         (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
         tower_grads.append(grads)
 
