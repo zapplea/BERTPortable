@@ -434,6 +434,7 @@ def main(config):
   rng = random.Random(config['training_data']['random_seed'])
   all_documents,vocab = prepare_corpus(config)
   print('prepared corpus')
+  print('len all documents: ',len(all_documents))
   exit()
   instances = create_training_instances(
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
