@@ -144,38 +144,39 @@ class GraphBuilder:
         with tf.get_default_graph().device('/cpu:0'):
             for k in range(self.config['model']['gpu_num']):
                 with tf.device('/gpu:%d' % k):
-                    # TODO: output placeholder.
-                    # EXPL: get input
-                    input_ids, input_mask, segment_ids, \
-                    masked_lm_positions, masked_lm_ids, masked_lm_weights, \
-                    next_sentence_labels = modeling.input_fn(self.config)
-                    tower_inputs.append({'input_ids':input_ids,
-                                         'input_mask':input_mask,
-                                         'segment_ids':segment_ids,
-                                         'masked_lm_positions':masked_lm_positions,
-                                         'masked_lm_ids':masked_lm_ids,
-                                         'masked_lm_weights':masked_lm_weights,
-                                         'next_sentence_labels':next_sentence_labels})
-                    # EXPL: get model
-                    model = modeling.BertModel(self.config,input_ids=input_ids,input_mask=input_mask,token_type_ids=segment_ids)
-                    # EXPL: get masked loss
-                    (masked_lm_loss,masked_lm_example_loss, masked_lm_log_probs) = \
-                        get_masked_lm_output(self.config, model.get_sequence_output(),
-                                             model.get_embedding_table(),
-                                             masked_lm_positions,
-                                             masked_lm_ids,
-                                             masked_lm_weights)
-                    # EXPL: get next sentence loss
-                    (next_sentence_loss, next_sentence_example_loss,next_sentence_log_probs) = \
-                        get_next_sentence_output(self.config, model.get_pooled_output(),
-                                                 next_sentence_labels)
-                    # EXPL: get loss
-                    total_loss = masked_lm_loss + next_sentence_loss
-                    # TODO: check the whole net to see whether the variables' name is given.
-                    # TODO: set a mechanism to check the variable name.
-                    # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
+                    with tf.variable_scope('BERT', reuse=k > 0):
+                        # TODO: output placeholder.
+                        # EXPL: get input
+                        input_ids, input_mask, segment_ids, \
+                        masked_lm_positions, masked_lm_ids, masked_lm_weights, \
+                        next_sentence_labels = modeling.input_fn(self.config)
+                        tower_inputs.append({'input_ids':input_ids,
+                                             'input_mask':input_mask,
+                                             'segment_ids':segment_ids,
+                                             'masked_lm_positions':masked_lm_positions,
+                                             'masked_lm_ids':masked_lm_ids,
+                                             'masked_lm_weights':masked_lm_weights,
+                                             'next_sentence_labels':next_sentence_labels})
+                        # EXPL: get model
+                        model = modeling.BertModel(self.config,input_ids=input_ids,input_mask=input_mask,token_type_ids=segment_ids,scope='bert')
+                        # EXPL: get masked loss
+                        (masked_lm_loss,masked_lm_example_loss, masked_lm_log_probs) = \
+                            get_masked_lm_output(self.config, model.get_sequence_output(),
+                                                 model.get_embedding_table(),
+                                                 masked_lm_positions,
+                                                 masked_lm_ids,
+                                                 masked_lm_weights)
+                        # EXPL: get next sentence loss
+                        (next_sentence_loss, next_sentence_example_loss,next_sentence_log_probs) = \
+                            get_next_sentence_output(self.config, model.get_pooled_output(),
+                                                     next_sentence_labels)
+                        # EXPL: get loss
+                        total_loss = masked_lm_loss + next_sentence_loss
+                        # TODO: check the whole net to see whether the variables' name is given.
+                        # TODO: set a mechanism to check the variable name.
+                        # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
-                    self.compute_grads(total_loss,tower_grads)
+                        self.compute_grads(total_loss,tower_grads)
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
             global_step = tf.train.get_or_create_global_step()
