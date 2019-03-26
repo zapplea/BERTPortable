@@ -435,7 +435,6 @@ def main(config):
   all_documents,vocab = prepare_corpus(config)
   print('prepared corpus')
   print('len all documents: ',len(all_documents))
-  exit()
   instances = create_training_instances(
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
       config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
@@ -444,7 +443,8 @@ def main(config):
   # DONE: check [MASK],[CLS],[SEP]. add ['[PAD]','[UNK]','[MASK]','[CLS]','[SEP]'] at top
   # DONE: check where the max sequence length is used. It seems that in instance, the document is merged to
   # DONE: one big sentence.
-
+  print('prepared instances')
+  exit()
   write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
                                   config['training_data']['max_predictions_per_seq'],
                                   config['training_data']['output_file'])
