@@ -272,7 +272,7 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions,
     # padding predictions.
     per_example_loss = -tf.reduce_sum(log_probs * one_hot_labels, axis=[-1])
     numerator = tf.reduce_sum(tf.cast(label_weights,dtype='float32') * per_example_loss)
-    denominator = tf.reduce_sum(label_weights) + 1e-5
+    denominator = tf.reduce_sum(label_weights) + tf.constant(1e-5,dtype='float32')
     loss = numerator / denominator
 
   return (loss, per_example_loss, log_probs)
