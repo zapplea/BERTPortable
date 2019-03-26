@@ -148,6 +148,7 @@ def write_instance_to_example_files(instances, vocab, max_seq_length,
                  masked_lm_weights_collection,
                  next_sentence_label_collection),
                 outf)
+    outf.flush()
   del input_ids_collection
   del input_mask_collection
   del segment_ids_collection
