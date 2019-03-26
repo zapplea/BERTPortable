@@ -460,20 +460,22 @@ def main(config):
 if __name__ == "__main__":
   # DONE: check where to convert token word to id, especially [CLS],[SEP], [MASK]. there is a function which will convert token to id
   # DONE: check it use multiple sentences or merge them to a big sentence. Merge a review to a big sentence.
-  config = {'corpus':{'input_filePaths':[# '/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
-                                         # '/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
-                                         # '/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
-                                         '/datastore/liu121/sentidata2/data/meituan_jieba/val_cut.pkl'],
+  config = {'corpus':{'input_filePaths':[
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
+                                         '/datastore/liu121/sentidata2/data/meituan_jieba/val_cut.pkl',
+                                        ],
                       'vocab_size':2000000,
                       'min_word_occurance':1,
                       'max_word_len':11,
-                      'unknown_word':'#UNK#',
+                      'unknown_word':'[UNK]',
                       'max_sentence_len':1144},
             'training_data':{'dupe_factor':10,
                              'short_seq_prob':0.1,
                              'masked_lm_prob':0.15,
                              'max_predictions_per_seq':20,
                              'random_seed':12345,
-                             'output_file':'/datastore/liu121/bert_trail/train_data_%d.pkl'}
+                             'output_file':'/datastore/liu121/bert/train_data_%d.pkl'}
             }
   main(config)
