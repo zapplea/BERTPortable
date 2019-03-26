@@ -435,7 +435,6 @@ def main(config):
   all_documents,vocab = prepare_corpus(config)
   print('prepared corpus')
   print('len all documents: ',len(all_documents))
-  exit()
   mod = 4
   step = int(len(all_documents)/mod)
 
