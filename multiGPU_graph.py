@@ -147,7 +147,7 @@ class GraphBuilder:
         with tf.get_default_graph().device('/cpu:0'):
             global_step = tf.train.get_or_create_global_step()
             opt = optimization.create_optimizer(init_lr=self.config['model']['lr'],
-                                                num_train_steps=self.config['model']['epoch'],
+                                                num_train_steps=self.config['train']['epoch'],
                                                 num_warmup_steps=self.config['model']['num_warmup_steps'],
                                                 global_step=global_step)
             for k in range(self.config['model']['gpu_num']):
