@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --get-user-env
 #SBATCH --job-name="BertDataPrep"
-#SBATCH --time=8:00:00
+#SBATCH --time=7:00:00
 #SBATCH --nodes=1
 #SBATCH --mem=200GB
 #SBATCH --ntasks-per-node=1

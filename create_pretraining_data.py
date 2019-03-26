@@ -24,6 +24,7 @@ import pandas as pd
 from collections import Counter
 import pickle
 import numpy as np
+import gc
 
 # flags = tf.flags
 #
@@ -435,7 +436,7 @@ def main(config):
   all_documents,vocab = prepare_corpus(config)
   print('prepared corpus')
   print('len all documents: ',len(all_documents))
-  mod = 4
+  mod = 2
   step = int(len(all_documents)/mod)
 
   for i in range(mod):
