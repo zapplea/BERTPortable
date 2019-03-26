@@ -30,6 +30,7 @@ if __name__ == "__main__":
                        'num_attention_heads':12,
                        'hidden_act':'relu', # linear/relu/gelu/tanh
                        'lr':5e-5,
+                       'intermediate_size':3072,
                        'num_warmup_steps':10000,
                        },
               'train':{'epoch':100000,
