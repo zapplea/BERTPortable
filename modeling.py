@@ -328,7 +328,7 @@ def embedding_lookup(input_ids,
   padding_embedding = tf.get_variable(name='padding_embedding',initializer=tf.zeros(shape=(1,embedding_size),dtype='float32'))
   embedding_table = tf.get_variable(
       name=word_embedding_name,
-      shape=[vocab_size, embedding_size-1],
+      shape=[vocab_size-1, embedding_size],
       initializer=create_initializer(initializer_range))
   embedding_table = tf.concat([padding_embedding,embedding_table],axis=0)
 

@@ -144,6 +144,7 @@ class GraphBuilder:
         with tf.get_default_graph().device('/cpu:0'):
             for k in range(self.config['model']['gpu_num']):
                 with tf.device('/gpu:%d' % k):
+                    print('gpu No.: %d'%k)
                     with tf.variable_scope('BERT', reuse=k > 0):
                         # TODO: output placeholder.
                         # EXPL: get input
