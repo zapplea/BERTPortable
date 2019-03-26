@@ -33,7 +33,7 @@ class Train:
 
     def generate_feed_dict(self,tower_inputs,tower_data):
         feed_dict = {}
-        train_mod = math.ceil(tower_data['input_ids'].shape[0] / self.config['model']['gpu_num'])
+        train_mod = math.ceil(len(tower_data['input_ids']) / self.config['model']['gpu_num'])
         for k in range(self.config['model']['gpu_num']):
             start = k * train_mod
             end = start + train_mod
