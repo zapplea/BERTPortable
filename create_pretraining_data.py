@@ -433,6 +433,8 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
 def main(config):
   rng = random.Random(config['training_data']['random_seed'])
   all_documents,vocab = prepare_corpus(config)
+  print('prepared corpus')
+  exit()
   instances = create_training_instances(
       all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
       config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
