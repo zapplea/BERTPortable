@@ -40,3 +40,4 @@ if __name__ == "__main__":
                       'train_file_num':2
                       }
              }
+    main(config)
