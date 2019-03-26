@@ -191,9 +191,9 @@ class GraphBuilder:
 
                         self.compute_grads(total_loss,tower_grads,opt)
                         eval_metrics = (metric_fn, [
-                            masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
+                            masked_lm_example_loss, masked_lm_log_probs, tf.cast(masked_lm_ids,dtype='float32'),
                             masked_lm_weights, next_sentence_example_loss,
-                            next_sentence_log_probs, next_sentence_labels
+                            next_sentence_log_probs, tf.cast(next_sentence_labels,dtype='float32')
                         ])
                         tower_eval_metrics.append(eval_metrics)
             # TODO: initialize with checkpoint when k == 0
