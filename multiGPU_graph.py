@@ -239,6 +239,11 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     #     "next_sentence_accuracy": next_sentence_accuracy,
     #     "next_sentence_loss": next_sentence_mean_loss,
     # }
+    print((masked_lm_accuracy,
+            masked_lm_mean_loss,
+            next_sentence_accuracy,
+            next_sentence_mean_loss,))
+    exit()
     return (masked_lm_accuracy,
             masked_lm_mean_loss,
             next_sentence_accuracy,
