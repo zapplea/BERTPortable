@@ -21,7 +21,7 @@ if __name__ == "__main__":
                        'is_training':True,
                        'hidden_dropout_prob':0.1,
                        'attention_probs_dropout_prob':0.1,
-                       'vocab_size':80335,
+                       'vocab_size':80335,# 400634
                        'hidden_size':300, # embedding size
                        'initializer_range':0.02,
                        'type_vocab_size':16,
@@ -36,11 +36,11 @@ if __name__ == "__main__":
               'train':{'epoch':100000,
                        'early_stop_limit':5,
                        'varval_filePath':'/datastore/liu121/bert_trail/weights/var_weights_val.pkl',
-                       'report_filePath':''
+                       'report_filePath':'/datastore/liu121/bert_trail/report/report.txt'
                        },
               'data':{'batch_size':10,
                       'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
-                      'train_file_num':2
+                      'train_file_num':5
                       }
              }
     main(config)
