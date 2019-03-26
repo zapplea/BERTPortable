@@ -1,6 +1,7 @@
 from multiGPU_graph import GraphBuilder
 from train import Train
 from datafeeder import DataFeeder
+import argparse
 
 def main(config):
     # TODO: construct metrics
@@ -11,9 +12,12 @@ def main(config):
     train.train(model_dict)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--gpu_num',type=int,default=2)
+    args = parser.parse_args()
     config = {'model':{'max_seq_length':1144,
                        'max_predictions_per_seq':20,
-                       'gpu_num':2,
+                       'gpu_num':args.gpu_num,
                        'is_training':True,
                        'hidden_dropout_prob':0.1,
                        'attention_probs_dropout_prob':0.1,
