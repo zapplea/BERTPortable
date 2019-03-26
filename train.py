@@ -17,9 +17,10 @@ class Train:
             file.flush()
 
     def train(self,model_dict):
-        train_op = model_dict['train_op']
-        avg_metrics = model_dict['avg_metrics']
-        init = tf.global_variables_initializer()
+        with tf.get_default_graph().as_default():
+            train_op = model_dict['train_op']
+            avg_metrics = model_dict['avg_metrics']
+            init = tf.global_variables_initializer()
         sess_config = tf.ConfigProto(allow_soft_placement=True)
         sess_config.gpu_options.allow_growth = True
         with tf.Session(graph=tf.get_default_graph(), config=sess_config) as sess:
