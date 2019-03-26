@@ -201,7 +201,7 @@ def prepare_corpus(config):
 
   words = [word for word, count in word_counts.most_common(config['corpus']['vocab_size'])
                   if count >= config['corpus']['min_word_occurance']]
-  words2 = ['[PAD]','[UNK]','[MASK]','[CLS]','[SEP]']
+  words2 = ['[PAD]','[MASK]','[CLS]','[SEP]']
   words2.extend(words)
   # generate word vocabulary
   word_to_id = {word: i for i, word in enumerate(words2)}
@@ -436,7 +436,7 @@ def main(config):
   all_documents,vocab = prepare_corpus(config)
   print('prepared corpus')
   print('len all documents: ',len(all_documents))
-  mod = 2
+  mod = 5
   step = int(len(all_documents)/mod)
 
   for i in range(mod):
