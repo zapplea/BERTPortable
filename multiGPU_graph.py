@@ -190,12 +190,11 @@ class GraphBuilder:
                         # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
                         self.compute_grads(total_loss,tower_grads,opt)
-                        print('eval_metrics')
-                        eval_metrics = (metric_fn, [
-                            masked_lm_example_loss, masked_lm_log_probs, tf.cast(masked_lm_ids,dtype='float32'),
+                        eval_metrics = metric_fn(
+                            masked_lm_example_loss, masked_lm_log_probs,masked_lm_ids,
                             masked_lm_weights, next_sentence_example_loss,
-                            next_sentence_log_probs, tf.cast(next_sentence_labels,dtype='float32')
-                        ])
+                            next_sentence_log_probs, next_sentence_labels)
+
                         tower_eval_metrics.append(eval_metrics)
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
@@ -210,9 +209,6 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
               masked_lm_weights, next_sentence_example_loss,
               next_sentence_log_probs, next_sentence_labels):
     """Computes the loss and accuracy of the model."""
-    print('#############################################')
-    print('metric_fn')
-    print('#############################################')
     masked_lm_log_probs = tf.reshape(masked_lm_log_probs,
                                      [-1, masked_lm_log_probs.shape[-1]])
     masked_lm_predictions = tf.argmax(
@@ -243,11 +239,6 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     #     "next_sentence_accuracy": next_sentence_accuracy,
     #     "next_sentence_loss": next_sentence_mean_loss,
     # }
-    print((masked_lm_accuracy,
-            masked_lm_mean_loss,
-            next_sentence_accuracy,
-            next_sentence_mean_loss,))
-    exit()
     return (masked_lm_accuracy,
             masked_lm_mean_loss,
             next_sentence_accuracy,
