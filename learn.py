@@ -5,8 +5,7 @@ from datafeeder import DataFeeder
 def main(config):
     # TODO: construct metrics
     # DONE: output all variables value to pickle, so that we can use it to initialize other models.
-    df = DataFeeder(config)
-    train = Train(config,df)
+    train = Train(config,DataFeeder)
     gb = GraphBuilder(config)
     model_dict = gb.build_graph()
     train.train(model_dict)
@@ -33,7 +32,7 @@ if __name__ == "__main__":
                        'varval_filePath':'.pkl',
                        },
               'data':{'batch_size':100,
-                      'train_dataset_filePath':'',
-                      'val_dataset_filePath':'',
+                      'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
+                      'train_file_num':2
                       }
              }

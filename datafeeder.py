@@ -42,39 +42,22 @@ class Dataset:
                masked_lm_ids_batch, masked_lm_weights_batch, next_sentence_labels_batch
 
 class DataFeeder:
-    def __init__(self,config):
+    def __init__(self,config,index):
         self.config = config
 
         self.train_input_ids,self.train_input_mask,self.train_segment_ids,\
         self.train_masked_lm_positions,self.train_masked_lm_ids, self.train_masked_lm_weights, \
-        self.train_next_sentence_labels = self.load_data('train')
+        self.train_next_sentence_labels = self.load_data(index)
 
-        self.val_input_ids, self.val_input_mask, self.val_segment_ids, \
-        self.val_masked_lm_positions, self.val_masked_lm_ids, self.val_masked_lm_weights, \
-        self.val_next_sentence_labels = self.load_data('val')
 
-    def load_data(self,mod):
-        if mod == 'train':
-            with open(self.config['data']['train_dataset_filePath'],'rb') as f:
-                # the data is dic
-                data = pickle.load(f)
-        elif mod == 'val':
-            with open(self.config['data']['val_dataset_filePath'],'rb') as f:
-                # the data is dic
-                data = pickle.load(f)
-        else:
-            raise ValueError('The value of mod can only be train or val')
+    def load_data(self,index):
+        with open(self.config['data']['train_dataset_filePath']%index,'rb') as f:
+            # the data is tuple
+            data = pickle.load(f)
         return data
 
-    def dataset_generator(self,mod):
-        if mod == 'train':
-            dataset = Dataset(self.train_input_ids,self.train_input_mask,self.train_segment_ids,
-                              self.train_masked_lm_positions,self.train_masked_lm_ids, self.train_masked_lm_weights,
-                              self.train_next_sentence_labels,batch_size=self.config['data']['batch_size'])
-        elif mod == 'val':
-            dataset = Dataset(self.val_input_ids, self.val_input_mask, self.val_segment_ids,
-                              self.val_masked_lm_positions, self.val_masked_lm_ids, self.val_masked_lm_weights,
-                              self.val_next_sentence_labels,batch_size=self.config['data']['batch_size'])
-        else:
-            raise ValueError('The value of mod can only be train or val')
+    def dataset_generator(self):
+        dataset = Dataset(self.train_input_ids,self.train_input_mask,self.train_segment_ids,
+                          self.train_masked_lm_positions,self.train_masked_lm_ids, self.train_masked_lm_weights,
+                          self.train_next_sentence_labels,batch_size=self.config['data']['batch_size'])
         return dataset

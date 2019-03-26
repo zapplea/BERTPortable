@@ -15,18 +15,21 @@ class Train:
         with tf.Session(graph=tf.get_default_graph(), config=config) as sess:
             sess.run(init)
             for i in range(self.config['train']['epoch']):
-                dataset = self.df.dataset_generator('train')
-                for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
-                    tower_data = {'input_ids': input_ids,
-                                  'input_mask': input_mask,
-                                  'segment_ids': segment_ids,
-                                  'masked_lm_positions': masked_lm_positions,
-                                  'masked_lm_ids': masked_lm_ids,
-                                  'masked_lm_weights': masked_lm_weights,
-                                  'next_sentence_labels': next_sentence_labels}
-                    feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
-                    sess.run(train_op,feed_dict=feed_dict)
-            self.save_variables_value(sess)
+                for j in range(self.config['data']['train_file_num']):
+                    df = self.df(config,j)
+                    dataset = df.dataset_generator()
+                    for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
+                        tower_data = {'input_ids': input_ids,
+                                      'input_mask': input_mask,
+                                      'segment_ids': segment_ids,
+                                      'masked_lm_positions': masked_lm_positions,
+                                      'masked_lm_ids': masked_lm_ids,
+                                      'masked_lm_weights': masked_lm_weights,
+                                      'next_sentence_labels': next_sentence_labels}
+                        feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
+                        sess.run(train_op,feed_dict=feed_dict)
+                # after each epoch, the variable weights will be saved for once.
+                self.save_variables_value(sess)
 
     def generate_feed_dict(self,tower_inputs,tower_data):
         feed_dict = {}
