@@ -36,7 +36,7 @@ if __name__ == "__main__":
               'train':{'epoch':100000,
                        'varval_filePath':'/datastore/liu121/bert_trail/weights/var_weights_val.pkl',
                        },
-              'data':{'batch_size':50,
+              'data':{'batch_size':20,
                       'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
                       'train_file_num':2
                       }
