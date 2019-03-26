@@ -38,7 +38,7 @@ class Train:
             start = k * train_mod
             end = start + train_mod
             for key in tower_data:
-                feed_dict[tower_inputs[key]] = tower_data[key][start:end]
+                feed_dict[tower_inputs[k][key]] = tower_data[key][start:end]
         return feed_dict
 
     def save_variables_value(self,sess):
