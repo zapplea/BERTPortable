@@ -34,9 +34,11 @@ if __name__ == "__main__":
                        'num_warmup_steps':10000,
                        },
               'train':{'epoch':100000,
+                       'early_stop_limit':5,
                        'varval_filePath':'/datastore/liu121/bert_trail/weights/var_weights_val.pkl',
+                       'report_filePath':''
                        },
-              'data':{'batch_size':20,
+              'data':{'batch_size':10,
                       'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
                       'train_file_num':2
                       }

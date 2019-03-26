@@ -139,11 +139,15 @@ class GraphBuilder:
         grads = list(zip(grad_ls,var_ls))
         tower_grads.append(grads)
 
-
+    def avg_metrics(self,tower_metrics):
+        metrics = list(zip(tower_metrics))
+        avg_metrics = tf.reduce_mean(metrics,axis=-1)
+        return avg_metrics
 
     def build_graph(self):
         tower_grads = []
         tower_inputs = []
+        tower_eval_metrics = []
         with tf.get_default_graph().device('/cpu:0'):
             global_step = tf.train.get_or_create_global_step()
             opt = optimization.create_optimizer(init_lr=self.config['model']['lr'],
@@ -186,21 +190,20 @@ class GraphBuilder:
                         # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
                         self.compute_grads(total_loss,tower_grads,opt)
+                        eval_metrics = (metric_fn, [
+                            masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
+                            masked_lm_weights, next_sentence_example_loss,
+                            next_sentence_log_probs, next_sentence_labels
+                        ])
+                        tower_eval_metrics.append(eval_metrics)
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
-
             train_op = opt.apply_gradients(avg_grads_vars, global_step=global_step)
             new_global_step = global_step + 1
             train_op = tf.group(train_op, [global_step.assign(new_global_step)])
+            avg_metrics_value = self.avg_metrics(tower_eval_metrics)
 
-            # TODO: check the shape of these values and then merge results from different gpu to get the eval.
-            # eval_metrics = (metric_fn, [
-            #     masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
-            #     masked_lm_weights, next_sentence_example_loss,
-            #     next_sentence_log_probs, next_sentence_labels
-            # ])
-
-        return {'train_op':train_op,'tower_inputs':tower_inputs}
+        return {'train_op':train_op,'tower_inputs':tower_inputs,'avg_metrics':avg_metrics_value}
 
 def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
               masked_lm_weights, next_sentence_example_loss,
@@ -230,12 +233,16 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     next_sentence_mean_loss = tf.metrics.mean(
         values=next_sentence_example_loss)
 
-    return {
-        "masked_lm_accuracy": masked_lm_accuracy,
-        "masked_lm_loss": masked_lm_mean_loss,
-        "next_sentence_accuracy": next_sentence_accuracy,
-        "next_sentence_loss": next_sentence_mean_loss,
-    }
+    # return {
+    #     "masked_lm_accuracy": masked_lm_accuracy,
+    #     "masked_lm_loss": masked_lm_mean_loss,
+    #     "next_sentence_accuracy": next_sentence_accuracy,
+    #     "next_sentence_loss": next_sentence_mean_loss,
+    # }
+    return (masked_lm_accuracy,
+            masked_lm_mean_loss,
+            next_sentence_accuracy,
+            next_sentence_mean_loss,)
 
 def get_masked_lm_output(bert_config, input_tensor, output_weights, positions,
                          label_ids, label_weights):
