@@ -442,6 +442,7 @@ def main(config):
   for i in range(mod):
     start = i*step
     end = start+step-1
+    print('start: %d, end: %d'%(start,end))
     part_of_all_documents = all_documents[start:end]
     instances = create_training_instances(
         part_of_all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
@@ -473,6 +474,6 @@ if __name__ == "__main__":
                              'masked_lm_prob':0.15,
                              'max_predictions_per_seq':20,
                              'random_seed':12345,
-                             'output_file':'/datastore/liu121/sentidata2/data/bert/train_data_%d.pkl'}
+                             'output_file':'/datastore/liu121/bert_trail/train_data_%d.pkl'}
             }
   main(config)
