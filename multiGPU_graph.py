@@ -183,6 +183,12 @@ class GraphBuilder:
                         (next_sentence_loss, next_sentence_example_loss,next_sentence_log_probs) = \
                             get_next_sentence_output(self.config, model.get_pooled_output(),
                                                      next_sentence_labels)
+                        # EXPL: get metrics
+                        eval_metrics = metric_fn(
+                            masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
+                            masked_lm_weights, next_sentence_example_loss,
+                            next_sentence_log_probs, next_sentence_labels)
+                        tower_eval_metrics.append(eval_metrics)
                         # EXPL: get loss
                         total_loss = masked_lm_loss + next_sentence_loss
                         # TODO: check the whole net to see whether the variables' name is given.
@@ -190,12 +196,7 @@ class GraphBuilder:
                         # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
                         self.compute_grads(total_loss,tower_grads,opt)
-                        eval_metrics = metric_fn(
-                            masked_lm_example_loss, masked_lm_log_probs,masked_lm_ids,
-                            masked_lm_weights, next_sentence_example_loss,
-                            next_sentence_log_probs, next_sentence_labels)
 
-                        tower_eval_metrics.append(eval_metrics)
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
             train_op = opt.apply_gradients(avg_grads_vars, global_step=global_step)
