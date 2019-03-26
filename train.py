@@ -15,7 +15,9 @@ class Train:
         with tf.Session(graph=tf.get_default_graph(), config=sess_config) as sess:
             sess.run(init)
             for i in range(self.config['train']['epoch']):
+                print('epoch: %d'%i)
                 for j in range(self.config['data']['train_file_num']):
+                    print('data file: ',self.config['data']['train_dataset_filePath']%j)
                     df = self.df(self.config,j)
                     dataset = df.dataset_generator()
                     for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
