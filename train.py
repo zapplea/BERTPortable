@@ -10,13 +10,13 @@ class Train:
     def train(self,model_dict):
         train_op = model_dict['train_op']
         init = tf.global_variables_initializer()
-        config = tf.ConfigProto(allow_soft_placement=True)
-        config.gpu_options.allow_growth = True
-        with tf.Session(graph=tf.get_default_graph(), config=config) as sess:
+        sess_config = tf.ConfigProto(allow_soft_placement=True)
+        sess_config.gpu_options.allow_growth = True
+        with tf.Session(graph=tf.get_default_graph(), config=sess_config) as sess:
             sess.run(init)
             for i in range(self.config['train']['epoch']):
                 for j in range(self.config['data']['train_file_num']):
-                    df = self.df(config,j)
+                    df = self.df(self.config,j)
                     dataset = df.dataset_generator()
                     for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
                         tower_data = {'input_ids': input_ids,
