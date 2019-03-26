@@ -15,10 +15,6 @@ class GraphBuilder:
         # zip(tower_grads)-->[((grad0_gpu0, var0_gpu0),(grad0_gpu1, var0_gpu1),(grad0_gpu2, var0_gpu2)),
         #                     ((grad1_gpu0, var1_gpu0),(grad1_gpu1, var1_gpu1),(grad1_gpu2, var0_gpu2)),
         #                     ... ...]
-        print('len tower grads: ',len(tower_grads))
-        print(tower_grads[0])
-        print(tower_grads[1])
-        exit()
         average_grads = []
         for grad_and_vars in zip(*tower_grads):
             # Note that each grad_and_vars looks like the following:
@@ -126,15 +122,21 @@ class GraphBuilder:
         joint_loss = tf.reduce_mean(joint_total_loss, axis=0)
         return attr_loss, senti_loss, joint_loss
 
-    def compute_grads(self,loss,tower_grads):
+    def compute_grads(self,loss,tower_grads,opt):
         # all var
         vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         for var in vars:
             print(var.name)
         print('==========================')
 
-        grads = tf.gradients(loss,vars,aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
-        (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
+        grads_and_vars = opt.compute_gradients(loss,var_list=vars,aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
+        grad_ls = []
+        var_ls = []
+        for grad,var in grads_and_vars:
+            grad_ls.append(grad)
+            var_ls.append(var)
+        (grad_ls, _) = tf.clip_by_global_norm(grad_ls, clip_norm=1.0)
+        grads = list(zip(grad_ls,var_ls))
         tower_grads.append(grads)
 
 
@@ -143,6 +145,11 @@ class GraphBuilder:
         tower_grads = []
         tower_inputs = []
         with tf.get_default_graph().device('/cpu:0'):
+            global_step = tf.train.get_or_create_global_step()
+            opt = optimization.create_optimizer(init_lr=self.config['model']['lr'],
+                                                num_train_steps=self.config['model']['epoch'],
+                                                num_warmup_steps=self.config['model']['num_warmup_steps'],
+                                                global_step=global_step)
             for k in range(self.config['model']['gpu_num']):
                 with tf.device('/gpu:%d' % k):
                     print('gpu No.: %d'%k)
@@ -178,14 +185,10 @@ class GraphBuilder:
                         # TODO: set a mechanism to check the variable name.
                         # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
-                        self.compute_grads(total_loss,tower_grads)
+                        self.compute_grads(total_loss,tower_grads,opt)
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
-            global_step = tf.train.get_or_create_global_step()
-            opt = optimization.create_optimizer(init_lr=self.config['model']['lr'],
-                                                num_train_steps=self.config['model']['epoch'],
-                                                num_warmup_steps=self.config['model']['num_warmup_steps'],
-                                                global_step=global_step)
+
             train_op = opt.apply_gradients(avg_grads_vars, global_step=global_step)
             new_global_step = global_step + 1
             train_op = tf.group(train_op, [global_step.assign(new_global_step)])
