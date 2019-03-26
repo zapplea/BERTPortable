@@ -190,6 +190,7 @@ class GraphBuilder:
                         # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
                         self.compute_grads(total_loss,tower_grads,opt)
+                        print('eval_metrics')
                         eval_metrics = (metric_fn, [
                             masked_lm_example_loss, masked_lm_log_probs, tf.cast(masked_lm_ids,dtype='float32'),
                             masked_lm_weights, next_sentence_example_loss,
@@ -209,6 +210,9 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
               masked_lm_weights, next_sentence_example_loss,
               next_sentence_log_probs, next_sentence_labels):
     """Computes the loss and accuracy of the model."""
+    print('#############################################')
+    print('metric_fn')
+    print('#############################################')
     masked_lm_log_probs = tf.reshape(masked_lm_log_probs,
                                      [-1, masked_lm_log_probs.shape[-1]])
     masked_lm_predictions = tf.argmax(
