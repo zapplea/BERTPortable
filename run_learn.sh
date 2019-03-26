@@ -12,4 +12,4 @@
 #module load tensorflow/1.12.0-py36-gpu
 #echo "loaded"
 
-python run_learn.sh --gpu_num 2
+python learn.py --gpu_num 2
