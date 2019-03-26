@@ -15,6 +15,10 @@ class GraphBuilder:
         # zip(tower_grads)-->[((grad0_gpu0, var0_gpu0),(grad0_gpu1, var0_gpu1),(grad0_gpu2, var0_gpu2)),
         #                     ((grad1_gpu0, var1_gpu0),(grad1_gpu1, var1_gpu1),(grad1_gpu2, var0_gpu2)),
         #                     ... ...]
+        print('len tower grads: ',len(tower_grads))
+        print(tower_grads[0])
+        print(tower_grads[1])
+        exit()
         average_grads = []
         for grad_and_vars in zip(*tower_grads):
             # Note that each grad_and_vars looks like the following:
