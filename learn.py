@@ -15,6 +15,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu_num',type=int,default=2)
     args = parser.parse_args()
+    # TODO: before run, need to check: 1. num of gpus in sbatch
+    # TODO:                            2. vocab size
+    # TODO:                            3. file path.
+    # TODO:                            4. batch size can be 5*gpu_nums
     config = {'model':{'max_seq_length':1144,
                        'max_predictions_per_seq':20,
                        'gpu_num':args.gpu_num,

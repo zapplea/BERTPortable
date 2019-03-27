@@ -37,12 +37,7 @@ class Train:
                     self.report('data file: %s'%self.config['data']['train_dataset_filePath']%j,self.report_file,'report')
                     df = self.df(self.config,j)
                     dataset = df.dataset_generator()
-                    count = 0
                     for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
-                        print('count: ',count)
-                        if count == 10:
-                            break
-                        count+=1
                         tower_data = {'input_ids': input_ids,
                                       'input_mask': input_mask,
                                       'segment_ids': segment_ids,
@@ -53,7 +48,6 @@ class Train:
                         feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
                         _, avg_metrics_value= sess.run([train_op,avg_metrics],feed_dict=feed_dict)
                         metrics_value_ls.append(avg_metrics_value)
-                    break
                 masked_lm_accuracy,\
                 masked_lm_mean_loss,\
                 next_sentence_accuracy,\
