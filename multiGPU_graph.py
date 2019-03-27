@@ -188,6 +188,7 @@ class GraphBuilder:
                 else:
                     for var in var_list:
                         if var.name not in var_set:
+                            print('############:')
                             print(var.name)
                     print('check is over')
                     exit()
