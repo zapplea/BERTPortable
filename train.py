@@ -20,6 +20,7 @@ class Train:
         with tf.get_default_graph().as_default():
             train_op = model_dict['train_op']
             avg_metrics = model_dict['avg_metrics']
+            eval_metrics = model_dict['eval_metrics']
             init_global = tf.global_variables_initializer()
             init_local = tf.local_variables_initializer()
         sess_config = tf.ConfigProto(allow_soft_placement=True)
@@ -50,6 +51,8 @@ class Train:
                                       'next_sentence_labels': next_sentence_labels}
                         feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
                         _, avg_metrics_value= sess.run([train_op,avg_metrics],feed_dict=feed_dict)
+                        eval_metrics_val = sess.run(eval_metrics,feed_dict=feed_dict)
+                        print('masked_lm_accuracy shape: ',eval_metrics[0].shape)
                         metrics_value_ls.append(avg_metrics_value)
                         mean_metrics = np.mean(metrics_value_ls, axis=0)
                         print('mean_metrics: ',tuple(mean_metrics))

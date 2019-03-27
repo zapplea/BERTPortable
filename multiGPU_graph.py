@@ -203,7 +203,7 @@ class GraphBuilder:
             train_op = tf.group(train_op, [global_step.assign(new_global_step)])
             avg_metrics_value = self.avg_metrics(tower_eval_metrics)
 
-        return {'train_op':train_op,'tower_inputs':tower_inputs,'avg_metrics':avg_metrics_value}
+        return {'train_op':train_op,'tower_inputs':tower_inputs,'avg_metrics':avg_metrics_value,'eval_metrics':eval_metrics}
 
 def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
               masked_lm_weights, next_sentence_example_loss,
