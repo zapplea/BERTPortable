@@ -139,7 +139,6 @@ class GraphBuilder:
                                                 num_train_steps=self.config['train']['epoch'],
                                                 num_warmup_steps=self.config['model']['num_warmup_steps'],
                                                 global_step=global_step)
-            var_set = set()
             for k in range(self.config['model']['gpu_num']):
                 with tf.device('/gpu:%d' % k):
                     print('gpu No.: %d'%k)
@@ -176,22 +175,11 @@ class GraphBuilder:
                         tower_eval_metrics.append(eval_metrics)
                         # EXPL: get loss
                         total_loss = masked_lm_loss + next_sentence_loss
-                        # TODO: check the whole net to see whether the variables' name is given.
-                        # TODO: set a mechanism to check the variable name.
-                        # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
+                        # DONE: check the whole net to see whether the variables' name is given.
+                        # DONE: set a mechanism to check the variable name.
+                        # DONE: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
                         self.compute_grads(total_loss,tower_grads,opt)
-                var_list = tf.trainable_variables()
-                if k==0:
-                    for var in var_list:
-                        var_set.add(var.name)
-                else:
-                    for var in var_list:
-                        if var.name not in var_set:
-                            print('############:')
-                            print(var.name)
-                    print('check is over')
-                    exit()
 
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
