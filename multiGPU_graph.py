@@ -186,12 +186,12 @@ class GraphBuilder:
                         (next_sentence_loss, next_sentence_example_loss,next_sentence_log_probs) = \
                             get_next_sentence_output(self.config, model.get_pooled_output(),
                                                      next_sentence_labels)
-                        # EXPL: get metrics
-                        eval_metrics = metric_fn(
-                            masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
-                            masked_lm_weights, next_sentence_example_loss,
-                            next_sentence_log_probs, next_sentence_labels,tower_metric_masked_lm_weights)
-                        tower_eval_metrics.append(eval_metrics)
+                        # # EXPL: get metrics
+                        # eval_metrics = metric_fn(
+                        #     masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
+                        #     masked_lm_weights, next_sentence_example_loss,
+                        #     next_sentence_log_probs, next_sentence_labels,tower_metric_masked_lm_weights)
+                        # tower_eval_metrics.append(eval_metrics)
                         # EXPL: get loss
                         total_loss = masked_lm_loss + next_sentence_loss
                         # TODO: check the whole net to see whether the variables' name is given.
