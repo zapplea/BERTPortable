@@ -20,8 +20,6 @@ class Train:
         with tf.get_default_graph().as_default():
             train_op = model_dict['train_op']
             avg_metrics = model_dict['avg_metrics']
-            tower_masked_lm_weights = model_dict['tower_masked_lm_weights']
-            tower_metric_masked_lm_weights = model_dict['tower_metric_masked_lm_weights']
             init_global = tf.global_variables_initializer()
             init_local = tf.local_variables_initializer()
         sess_config = tf.ConfigProto(allow_soft_placement=True)
