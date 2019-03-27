@@ -53,8 +53,6 @@ class Train:
                         feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
                         _, avg_metrics_value= sess.run([train_op,avg_metrics],feed_dict=feed_dict)
                         metrics_value_ls.append(avg_metrics_value)
-                        print(avg_metrics_value)
-                        exit()
                     break
                 masked_lm_accuracy,\
                 masked_lm_mean_loss,\
