@@ -87,7 +87,7 @@ class GraphBuilder:
         return (summed_values, unique_indices)
 
     def clip_grads(self, grads, all_clip_norm_val = 1.0,):
-        # FIXME: delete everything about do_summaries. We don't need it in here.
+        # FIXED: delete everything about do_summaries. We don't need it in here.
         # grads = [(grad1, var1), (grad2, var2), ...]
         def _clip_norms(grad_and_vars, val,):
             # grad_and_vars is a list of (g, v) pairs
@@ -107,20 +107,6 @@ class GraphBuilder:
         assert len(ret) == len(grads)
 
         return ret
-
-    def average_loss(self, graph, gpu_num):
-        # FIXME: need to fix
-        attr_total_loss = []
-        senti_total_loss = []
-        joint_total_loss = []
-        for i in range(gpu_num):
-            attr_total_loss.append(graph.get_collection('attr_loss')[i])
-            senti_total_loss.append(graph.get_collection('senti_loss')[i])
-            joint_total_loss.append(graph.get_collection('joint_loss')[i])
-        attr_loss = tf.reduce_mean(attr_total_loss, axis=0)
-        senti_loss = tf.reduce_mean(senti_total_loss,axis=0)
-        joint_loss = tf.reduce_mean(joint_total_loss, axis=0)
-        return attr_loss, senti_loss, joint_loss
 
     def compute_grads(self,loss,tower_grads,opt):
         # all var
@@ -153,11 +139,11 @@ class GraphBuilder:
                                                 num_train_steps=self.config['train']['epoch'],
                                                 num_warmup_steps=self.config['model']['num_warmup_steps'],
                                                 global_step=global_step)
+            var_set = set()
             for k in range(self.config['model']['gpu_num']):
                 with tf.device('/gpu:%d' % k):
                     print('gpu No.: %d'%k)
                     with tf.variable_scope('BERT', reuse=k > 0):
-                        # TODO: output placeholder.
                         # EXPL: get input
                         input_ids, input_mask, segment_ids, \
                         masked_lm_positions, masked_lm_ids, masked_lm_weights, \
@@ -195,6 +181,16 @@ class GraphBuilder:
                         # TODO: test whether name of tf.layers.dense variable has the same name when use twice under the same scope.
 
                         self.compute_grads(total_loss,tower_grads,opt)
+                var_list = tf.trainable_variables()
+                if k==0:
+                    for var in var_list:
+                        var_set.add(var.name)
+                else:
+                    for var in var_list:
+                        if var.name not in var_set:
+                            print(var.name)
+                    print('check is over')
+                    exit()
 
             # TODO: initialize with checkpoint when k == 0
             avg_grads_vars = self.average_gradients(tower_grads)
