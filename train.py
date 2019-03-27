@@ -48,6 +48,7 @@ class Train:
                                       'next_sentence_labels': next_sentence_labels}
                         feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
                         sess.run([tower_masked_lm_weights, tower_metric_masked_lm_weights],feed_dict=feed_dict)
+                        sess.run(avg_metrics,feed_dict=feed_dict)
                         exit()
                         _, avg_metrics_value= sess.run([train_op,avg_metrics],feed_dict=feed_dict)
                         metrics_value_ls.append(avg_metrics_value)
