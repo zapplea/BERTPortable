@@ -140,16 +140,13 @@ class GraphBuilder:
         tower_grads.append(grads)
 
     def avg_metrics(self,tower_metrics):
-        metrics = list(zip(tower_metrics))
-        avg_metrics = tf.reduce_mean(metrics,axis=-1)
+        avg_metrics = tf.reduce_mean(tower_metrics,axis=0)
         return avg_metrics
 
     def build_graph(self):
         tower_grads = []
         tower_inputs = []
         tower_eval_metrics = []
-        tower_masked_lm_weights = []
-        tower_metric_masked_lm_weights = []
         with tf.get_default_graph().device('/cpu:0'):
             global_step = tf.train.get_or_create_global_step()
             opt = optimization.create_optimizer(init_lr=self.config['model']['lr'],
@@ -172,7 +169,6 @@ class GraphBuilder:
                                              'masked_lm_ids':masked_lm_ids,
                                              'masked_lm_weights':masked_lm_weights,
                                              'next_sentence_labels':next_sentence_labels})
-                        tower_masked_lm_weights.append(masked_lm_weights)
                         # EXPL: get model
                         model = modeling.BertModel(self.config,input_ids=input_ids,input_mask=input_mask,token_type_ids=segment_ids,scope='bert')
                         # EXPL: get masked loss
@@ -186,12 +182,12 @@ class GraphBuilder:
                         (next_sentence_loss, next_sentence_example_loss,next_sentence_log_probs) = \
                             get_next_sentence_output(self.config, model.get_pooled_output(),
                                                      next_sentence_labels)
-                        # # EXPL: get metrics
-                        # eval_metrics = metric_fn(
-                        #     masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
-                        #     masked_lm_weights, next_sentence_example_loss,
-                        #     next_sentence_log_probs, next_sentence_labels,tower_metric_masked_lm_weights)
-                        # tower_eval_metrics.append(eval_metrics)
+                        # EXPL: get metrics
+                        eval_metrics = metric_fn(
+                            masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
+                            masked_lm_weights, next_sentence_example_loss,
+                            next_sentence_log_probs, next_sentence_labels)
+                        tower_eval_metrics.append(eval_metrics)
                         # EXPL: get loss
                         total_loss = masked_lm_loss + next_sentence_loss
                         # TODO: check the whole net to see whether the variables' name is given.
@@ -207,12 +203,11 @@ class GraphBuilder:
             train_op = tf.group(train_op, [global_step.assign(new_global_step)])
             avg_metrics_value = self.avg_metrics(tower_eval_metrics)
 
-        return {'train_op':train_op,'tower_inputs':tower_inputs,'avg_metrics':avg_metrics_value,
-                'tower_masked_lm_weights':tower_masked_lm_weights,'tower_metric_masked_lm_weights':tower_metric_masked_lm_weights}
+        return {'train_op':train_op,'tower_inputs':tower_inputs,'avg_metrics':avg_metrics_value}
 
 def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
               masked_lm_weights, next_sentence_example_loss,
-              next_sentence_log_probs, next_sentence_labels,tower_metric_masked_lm_weights):
+              next_sentence_log_probs, next_sentence_labels):
     """Computes the loss and accuracy of the model."""
     masked_lm_log_probs = tf.reshape(masked_lm_log_probs,
                                      [-1, masked_lm_log_probs.shape[-1]])
@@ -221,7 +216,6 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     masked_lm_example_loss = tf.reshape(masked_lm_example_loss, [-1])
     masked_lm_ids = tf.reshape(masked_lm_ids, [-1])
     masked_lm_weights = tf.reshape(masked_lm_weights, [-1])
-    tower_metric_masked_lm_weights.append(masked_lm_weights)
     masked_lm_accuracy = tf.metrics.accuracy(
         labels=masked_lm_ids,
         predictions=masked_lm_predictions,
@@ -245,10 +239,10 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     #     "next_sentence_accuracy": next_sentence_accuracy,
     #     "next_sentence_loss": next_sentence_mean_loss,
     # }
-    return (masked_lm_accuracy,
+    return [masked_lm_accuracy,
             masked_lm_mean_loss,
             next_sentence_accuracy,
-            next_sentence_mean_loss,)
+            next_sentence_mean_loss,]
 
 def get_masked_lm_output(bert_config, input_tensor, output_weights, positions,
                          label_ids, label_weights):

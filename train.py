@@ -41,6 +41,8 @@ class Train:
                     for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
                         print('count: ',count)
                         count+=1
+                        if count == 10:
+                            break
                         tower_data = {'input_ids': input_ids,
                                       'input_mask': input_mask,
                                       'segment_ids': segment_ids,
@@ -51,16 +53,21 @@ class Train:
                         feed_dict = self.generate_feed_dict(model_dict['tower_inputs'],tower_data)
                         _, avg_metrics_value= sess.run([train_op,avg_metrics],feed_dict=feed_dict)
                         metrics_value_ls.append(avg_metrics_value)
-                        masked_lm_accuracy,\
-                        masked_lm_mean_loss,\
-                        next_sentence_accuracy,\
-                        next_sentence_mean_loss = tuple(np.mean(metrics_value_ls,axis=0))
-                        self.report('masked_lm_accuracy: %f'%masked_lm_accuracy, self.report_file, 'report')
-                        self.report('masked_lm_mean_loss: %f' %masked_lm_mean_loss , self.report_file, 'report')
-                        self.report('next_sentence_accuracy: %f' %next_sentence_accuracy, self.report_file, 'report')
-                        self.report('next_sentence_mean_loss: %f' %next_sentence_mean_loss, self.report_file, 'report')
+                        mean_metrics = np.mean(metrics_value_ls, axis=0)
+                        print('mean_metrics: ',mean_metrics)
+                        print('mean_metrics shape: ',mean_metrics.shape)
+                        exit()
+                    break
+                masked_lm_accuracy,\
+                masked_lm_mean_loss,\
+                next_sentence_accuracy,\
+                next_sentence_mean_loss = tuple(np.mean(metrics_value_ls,axis=0))
+                self.report('masked_lm_accuracy: %f'%masked_lm_accuracy, self.report_file, 'report')
+                self.report('masked_lm_mean_loss: %f' %masked_lm_mean_loss , self.report_file, 'report')
+                self.report('next_sentence_accuracy: %f' %next_sentence_accuracy, self.report_file, 'report')
+                self.report('next_sentence_mean_loss: %f' %next_sentence_mean_loss, self.report_file, 'report')
                 # after each epoch, the variable weights will be saved for once.
-                        self.save_variables_value(sess)
+                self.save_variables_value(sess)
 
     def generate_feed_dict(self,tower_inputs,tower_data):
         feed_dict = {}
