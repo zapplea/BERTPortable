@@ -79,6 +79,6 @@ class Train:
         for var in vars:
             value = sess.run(var)
             values[var.name] = value
-        with open(self.config['train']['varval_filePath']) as f:
+        with open(self.config['train']['varval_filePath'],'wb') as f:
             pickle.dump(values,f)
         print('save variables value to: %s'%(self.config['train']['varval_filePath']))
