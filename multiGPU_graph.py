@@ -216,11 +216,11 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     masked_lm_example_loss = tf.reshape(masked_lm_example_loss, [-1])
     masked_lm_ids = tf.reshape(masked_lm_ids, [-1])
     masked_lm_weights = tf.reshape(masked_lm_weights, [-1])
-    _, masked_lm_accuracy = tf.metrics.accuracy(
+    masked_lm_accuracy, _ = tf.metrics.accuracy(
         labels=masked_lm_ids,
         predictions=masked_lm_predictions,
         weights=masked_lm_weights)
-    _, masked_lm_mean_loss = tf.metrics.mean(
+    masked_lm_mean_loss, _ = tf.metrics.mean(
         values=masked_lm_example_loss, weights=masked_lm_weights)
 
     next_sentence_log_probs = tf.reshape(
@@ -228,9 +228,9 @@ def metric_fn(masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
     next_sentence_predictions = tf.argmax(
         next_sentence_log_probs, axis=-1, output_type=tf.int32)
     next_sentence_labels = tf.reshape(next_sentence_labels, [-1])
-    _, next_sentence_accuracy = tf.metrics.accuracy(
+    next_sentence_accuracy, _ = tf.metrics.accuracy(
         labels=next_sentence_labels, predictions=next_sentence_predictions)
-    _, next_sentence_mean_loss = tf.metrics.mean(
+    next_sentence_mean_loss, _ = tf.metrics.mean(
         values=next_sentence_example_loss)
 
     # return {
