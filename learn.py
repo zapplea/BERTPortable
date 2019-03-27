@@ -35,11 +35,11 @@ if __name__ == "__main__":
                        },
               'train':{'epoch':100000,
                        'early_stop_limit':5,
-                       'varval_filePath':'/datastore/liu121/bert_trail/weights/var_weights_val.pkl',
-                       'report_filePath':'/datastore/liu121/bert_trail/report/report.txt'
+                       'varval_filePath':'/datastore/liu121/bert/weights/var_weights_val.pkl',
+                       'report_filePath':'/datastore/liu121/bert/report/report.txt'
                        },
               'data':{'batch_size':10,
-                      'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
+                      'train_dataset_filePath':'/datastore/liu121/bert/train_data/train_data_%d.pkl',
                       'train_file_num':5
                       }
              }
