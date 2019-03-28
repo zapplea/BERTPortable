@@ -12,3 +12,4 @@ for i in range(config['data']['train_file_num']):
     print('total dataset size: ',np.array(df.train_input_ids).shape[0])
     for input_ids, input_mask, segment_ids, masked_lm_positions, masked_lm_ids, masked_lm_weights, next_sentence_labels in dataset:
         print('batch size: ',np.array(input_ids).shape)
+    exit()
