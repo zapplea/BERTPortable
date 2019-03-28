@@ -20,6 +20,7 @@ for i in range(config['data']['train_file_num']):
     df = DataFeeder(config,i)
     dataset = df.dataset_generator()
     print('total dataset size: ',np.array(df.train_input_ids).shape[0])
+    exit()
     for input_ids, input_mask, segment_ids, masked_lm_positions, masked_lm_ids, masked_lm_weights, next_sentence_labels in dataset:
         print('batch size: ',np.array(input_ids).shape)
         tower_data = {'input_ids': input_ids,
@@ -29,6 +30,6 @@ for i in range(config['data']['train_file_num']):
                       'masked_lm_ids': masked_lm_ids,
                       'masked_lm_weights': masked_lm_weights,
                       'next_sentence_labels': next_sentence_labels}
-        generate_feed_dict(config,tower_data)
+        # generate_feed_dict(config,tower_data)
         print('=====================================')
     exit()
