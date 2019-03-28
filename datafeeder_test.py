@@ -2,7 +2,7 @@ from datafeeder import DataFeeder
 import numpy as np
 
 config ={'data':{'batch_size':10,
-                      'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
+                      'train_dataset_filePath':'/datastore/liu121/bert/train_data/train_data_%d.pkl',
                       'train_file_num':5
                       }}
 
