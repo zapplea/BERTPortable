@@ -9,7 +9,6 @@ def generate_feed_dict(config,tower_data):
         end = start + train_mod
         for key in tower_data:
             print(np.array(tower_data[key][start:end]).shape)
-            break
 
 config ={'data':{'batch_size':10,
                       'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
