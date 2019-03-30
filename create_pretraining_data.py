@@ -452,17 +452,19 @@ def main(config):
     end = start+step-1
     print('start: %d, end: %d'%(start,end))
     part_of_all_documents = all_documents[start:end]
+    print('input documents length: ',len(part_of_all_documents))
     instances = create_training_instances(
         part_of_all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
         config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
         config['training_data']['max_predictions_per_seq'],rng)
-    print("instance sample 77: ",instances[77])
+    print('instances length: ',len(instances))
+    # print("instance sample 77: ",instances[77])
     # DONE: check [MASK],[CLS],[SEP]. add ['[PAD]','[UNK]','[MASK]','[CLS]','[SEP]'] at top
     # DONE: check where the max sequence length is used. It seems that in instance, the document is merged to
     # DONE: one big sentence.
-    write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
-                                    config['training_data']['max_predictions_per_seq'],
-                                    config['training_data']['output_file']%i)
+    # write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
+    #                                 config['training_data']['max_predictions_per_seq'],
+    #                                 config['training_data']['output_file']%i)
     del instances
     gc.collect()
 
@@ -471,9 +473,9 @@ if __name__ == "__main__":
   # DONE: check where to convert token word to id, especially [CLS],[SEP], [MASK]. there is a function which will convert token to id
   # DONE: check it use multiple sentences or merge them to a big sentence. Merge a review to a big sentence.
   config = {'corpus':{'input_filePaths':[
-                                         '/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
-                                         '/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
-                                         '/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
+                                         # '/datastore/liu121/sentidata2/data/meituan_jieba/testa_cut.pkl',
+                                         # '/datastore/liu121/sentidata2/data/meituan_jieba/testb_cut.pkl',
+                                         # '/datastore/liu121/sentidata2/data/meituan_jieba/train_cut.pkl',
                                          '/datastore/liu121/sentidata2/data/meituan_jieba/val_cut.pkl',
                                         ],
                       'vocab_size':2000000,
@@ -486,6 +488,6 @@ if __name__ == "__main__":
                              'masked_lm_prob':0.15,
                              'max_predictions_per_seq':20,
                              'random_seed':12345,
-                             'output_file':'/datastore/liu121/bert/train_data_%d.pkl'}
+                             'output_file':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl'}
             }
   main(config)

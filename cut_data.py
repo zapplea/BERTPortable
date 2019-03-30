@@ -1,5 +1,5 @@
 import pickle
-
+import gc
 
 class Cut:
     def __init__(self,config,index):
@@ -28,3 +28,5 @@ if __name__ == "__main__":
     for i in range(5):
         cut = Cut(config,i)
         cut.anal()
+        del cut
+        gc.collect()
