@@ -37,10 +37,7 @@ class Train:
                     self.report('data file: %s'%self.config['data']['train_dataset_filePath']%j,self.report_file,'report')
                     df = self.df(self.config,j)
                     dataset = df.dataset_generator()
-                    count = 0
                     for input_ids,input_mask,segment_ids,masked_lm_positions,masked_lm_ids,masked_lm_weights,next_sentence_labels in dataset:
-                        self.report('count: %d'%count,self.report_file,'report')
-                        count+=1
                         tower_data = {'input_ids': input_ids,
                                       'input_mask': input_mask,
                                       'segment_ids': segment_ids,
