@@ -22,7 +22,7 @@ class Cut:
 
 if __name__ == "__main__":
     config = {'data':{'batch_size':10,
-                      'train_dataset_filePath':'/datastore/liu121/bert/train_data/train_data_%d.pkl',
+                      'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
                       'train_file_num':5
                       }}
     for i in range(5):
