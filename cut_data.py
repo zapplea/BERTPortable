@@ -11,6 +11,7 @@ class Cut:
 
 
     def load_data(self,index):
+        print(self.config['data']['train_dataset_filePath']%index)
         with open(self.config['data']['train_dataset_filePath']%index,'rb') as f:
             # the data is tuple
             data = pickle.load(f)
@@ -24,6 +25,6 @@ if __name__ == "__main__":
                       'train_dataset_filePath':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
                       'train_file_num':5
                       }}
-    cut = Cut(config,2)
-
-    cut.anal()
+    for i in range(5):
+        cut = Cut(config,i)
+        cut.anal()
