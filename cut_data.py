@@ -16,7 +16,7 @@ class Cut:
             data = pickle.load(f)
         return data
 
-    def cut(self):
+    def anal(self):
         print(len(self.train_input_ids))
 
 if __name__ == "__main__":
@@ -25,4 +25,5 @@ if __name__ == "__main__":
                       'train_file_num':5
                       }}
     cut = Cut(config,2)
-    
+
+    cut.anal()
