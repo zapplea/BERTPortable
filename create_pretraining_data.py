@@ -438,6 +438,12 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
     else:
       trunc_tokens.pop()
 
+def supply(instances,divided_by):
+  sup = divided_by-len(instances)%divided_by
+  indexes = np.random.randint(0,len(instances),size=(sup,)).tolist()
+  for i in indexes:
+    instances.append(instances[i])
+  return instances
 
 def main(config):
   rng = random.Random(config['training_data']['random_seed'])
@@ -448,6 +454,7 @@ def main(config):
   step = int(len(all_documents)/mod)
 
   for i in range(mod):
+    print('=============================')
     start = i*step
     end = start+step-1
     print('start: %d, end: %d'%(start,end))
@@ -457,14 +464,15 @@ def main(config):
         part_of_all_documents, vocab, config['corpus']['max_sentence_len'], config['training_data']['dupe_factor'],
         config['training_data']['short_seq_prob'], config['training_data']['masked_lm_prob'],
         config['training_data']['max_predictions_per_seq'],rng)
+    instances = supply(instances,config['training_data']['divided_by'])
     print('instances length: ',len(instances))
     # print("instance sample 77: ",instances[77])
     # DONE: check [MASK],[CLS],[SEP]. add ['[PAD]','[UNK]','[MASK]','[CLS]','[SEP]'] at top
     # DONE: check where the max sequence length is used. It seems that in instance, the document is merged to
     # DONE: one big sentence.
-    # write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
-    #                                 config['training_data']['max_predictions_per_seq'],
-    #                                 config['training_data']['output_file']%i)
+    write_instance_to_example_files(instances, vocab, config['corpus']['max_sentence_len'],
+                                    config['training_data']['max_predictions_per_seq'],
+                                    config['training_data']['output_file']%i)
     del instances
     gc.collect()
 
@@ -488,6 +496,7 @@ if __name__ == "__main__":
                              'masked_lm_prob':0.15,
                              'max_predictions_per_seq':20,
                              'random_seed':12345,
-                             'output_file':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl'}
+                             'output_file':'/datastore/liu121/bert_trail/train_data/train_data_%d.pkl',
+                             'divided_by':20,}
             }
   main(config)
